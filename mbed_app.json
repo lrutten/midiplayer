@@ -2,6 +2,13 @@
     "target_overrides": {
         "K64F": {
             "platform.stdio-baud-rate": 9600
+        },
+        "NUCLEO_F446RE": {
+            "target.components_add": ["SD"],
+            "sd.SPI_MOSI": "PA_7",
+            "sd.SPI_MISO": "PA_6",
+            "sd.SPI_CLK":  "PA_5",
+            "sd.SPI_CS":   "PB_6"
         }
     }
 }
