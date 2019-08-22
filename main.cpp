@@ -92,46 +92,46 @@ void erase()
 // Entry point for the example
 int main()
 {
-   printf("--- Mbed OS filesystem example ---\n");
+   printf("--- Mbed OS filesystem example ---\r\n");
 
    // Setup the erase event on button press, use the event queue
    // to avoid running in interrupt context
    irq.fall(mbed_event_queue()->event(erase));
 
    // Try to mount the filesystem
-   printf("Mounting the filesystem... ");
+   printf("Mounting the filesystem... \r\n");
    fflush(stdout);
    int err = fs.mount(bd);
-   printf("%s\n", (err ? "Fail :(" : "OK"));
+   printf("%s\r\n", (err ? "Fail :(" : "OK"));
    if (err)
    {
       // Reformat if we can't mount the filesystem
       // this should only happen on the first boot
-      printf("No filesystem found, formatting... ");
+      printf("No filesystem found, formatting... \r\n");
       fflush(stdout);
       err = fs.reformat(bd);
-      printf("%s\n", (err ? "Fail :(" : "OK"));
+      printf("%s\r\n", (err ? "Fail :(" : "OK"));
       if (err)
       {
-         error("error: %s (%d)\n", strerror(-err), err);
+         error("error: %s (%d)\r\n", strerror(-err), err);
       }
    }
 
    // Open the numbers file
-   printf("Opening \"/fs/numbers.txt\"... ");
+   printf("Opening \"/fs/numbers.txt\"... \r\n");
    fflush(stdout);
    FILE *f = fopen("/fs/numbers.txt", "r+");
-   printf("%s\n", (!f ? "Fail :(" : "OK"));
+   printf("%s\r\n", (!f ? "Fail :(" : "OK"));
    if (!f)
    {
       // Create the numbers file if it doesn't exist
-      printf("No file found, creating a new file... ");
+      printf("No file found, creating a new file... \r\n");
       fflush(stdout);
       f = fopen("/fs/numbers.txt", "w+");
-      printf("%s\n", (!f ? "Fail :(" : "OK"));
+      printf("%s\r\n", (!f ? "Fail :(" : "OK"));
       if (!f)
       {
-         error("error: %s (%d)\n", strerror(errno), -errno);
+         error("error: %s (%d)\r\n", strerror(errno), -errno);
       }
 
       for (int i = 0; i < 10; i++)
@@ -142,7 +142,7 @@ int main()
          if (err < 0)
          {
             printf("Fail :(\n");
-            error("error: %s (%d)\n", strerror(errno), -errno);
+            error("error: %s (%d)\r\n", strerror(errno), -errno);
          }
       }
       printf("\rWriting numbers (%d/%d)... OK\n", 10, 10);
@@ -186,23 +186,23 @@ int main()
    printf("Closing \"/fs/numbers.txt\"... ");
    fflush(stdout);
    err = fclose(f);
-   printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
+   printf("%s\r\n", (err < 0 ? "Fail :(" : "OK"));
    if (err < 0)
    {
-      error("error: %s (%d)\n", strerror(errno), -errno);
+      error("error: %s (%d)\r\n", strerror(errno), -errno);
    }
     
    // Display the root directory
    printf("Opening the root directory... ");
    fflush(stdout);
    DIR *d = opendir("/fs/");
-   printf("%s\n", (!d ? "Fail :(" : "OK"));
+   printf("%s\r\n", (!d ? "Fail :(" : "OK"));
    if (!d)
    {
-      error("error: %s (%d)\n", strerror(errno), -errno);
+      error("error: %s (%d)\r\n", strerror(errno), -errno);
    }
 
-   printf("root directory:\n");
+   printf("root directory:\r\n");
    while (true)
    {
       struct dirent *e = readdir(d);
@@ -211,29 +211,29 @@ int main()
          break;
       }
 
-      printf("    %s\n", e->d_name);
+      printf("    %s\r\n", e->d_name);
    }
 
    printf("Closing the root directory... ");
    fflush(stdout);
    err = closedir(d);
-   printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
+   printf("%s\r\n", (err < 0 ? "Fail :(" : "OK"));
    if (err < 0)
    {
-      error("error: %s (%d)\n", strerror(errno), -errno);
+      error("error: %s (%d)\r\n", strerror(errno), -errno);
    }
 
    // Display the numbers file
    printf("Opening \"/fs/numbers.txt\"... ");
    fflush(stdout);
    f = fopen("/fs/numbers.txt", "r");
-   printf("%s\n", (!f ? "Fail :(" : "OK"));
+   printf("%s\r\n", (!f ? "Fail :(" : "OK"));
    if (!f)
    {
-      error("error: %s (%d)\n", strerror(errno), -errno);
+      error("error: %s (%d)\r\n", strerror(errno), -errno);
    }
 
-   printf("numbers:\n");
+   printf("numbers:\r\n");
    while (!feof(f))
    {
       int c = fgetc(f);
@@ -243,7 +243,7 @@ int main()
    printf("\rClosing \"/fs/numbers.txt\"... ");
    fflush(stdout);
    err = fclose(f);
-   printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
+   printf("%s\r\n", (err < 0 ? "Fail :(" : "OK"));
    if (err < 0)
    {
       error("error: %s (%d)\n", strerror(errno), -errno);
@@ -253,13 +253,13 @@ int main()
    printf("Unmounting... ");
    fflush(stdout);
    err = fs.unmount();
-   printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
+   printf("%s\r\n", (err < 0 ? "Fail :(" : "OK"));
    if (err < 0)
    {
-      error("error: %s (%d)\n", strerror(-err), err);
+      error("error: %s (%d)\r\n", strerror(-err), err);
    }
         
-   printf("Mbed OS filesystem example done!\n");
+   printf("Mbed OS filesystem example done!\r\n");
 }
 
 
