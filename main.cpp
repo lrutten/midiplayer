@@ -11,6 +11,7 @@
 #include "SDBlockDevice.h"
 #endif 
 
+#include "MidiFile.h"
 
 /*
 DigitalOut led1(LED1);
@@ -55,48 +56,14 @@ SDBlockDevice *bd = new SDBlockDevice(
 #include "FATFileSystem.h"
 FATFileSystem fs("fs");
 
-
-// Set up the button to trigger an erase
-InterruptIn irq(BUTTON1);
-void erase()
-{
-   printf("Initializing the block device... ");
-   fflush(stdout);
-   int err = bd->init();
-   printf("%s\n", (err ? "Fail :(" : "OK"));
-   if (err)
-   {
-      error("error: %s (%d)\n", strerror(-err), err);
-   }
-
-   printf("Erasing the block device... ");
-   fflush(stdout);
-   err = bd->erase(0, bd->size());
-   printf("%s\n", (err ? "Fail :(" : "OK"));
-   if (err)
-   {
-      error("error: %s (%d)\n", strerror(-err), err);
-   }
-
-   printf("Deinitializing the block device... ");
-   fflush(stdout);
-   err = bd->deinit();
-   printf("%s\n", (err ? "Fail :(" : "OK"));
-   if (err)
-   {
-      error("error: %s (%d)\n", strerror(-err), err);
-   }
-}
+MidiFile mf;
+Timer    t;
 
 
 // Entry point for the example
 int main()
 {
-   printf("--- Mbed OS filesystem example ---\r\n");
-
-   // Setup the erase event on button press, use the event queue
-   // to avoid running in interrupt context
-   irq.fall(mbed_event_queue()->event(erase));
+   printf("--- Mbed OS midi player ---\r\n");
 
    // Try to mount the filesystem
    printf("Mounting the filesystem... \r\n");
@@ -105,91 +72,8 @@ int main()
    printf("%s\r\n", (err ? "Fail :(" : "OK"));
    if (err)
    {
-      // Reformat if we can't mount the filesystem
-      // this should only happen on the first boot
-      printf("No filesystem found, formatting... \r\n");
+      printf("No filesystem found\r\n");
       fflush(stdout);
-      err = fs.reformat(bd);
-      printf("%s\r\n", (err ? "Fail :(" : "OK"));
-      if (err)
-      {
-         error("error: %s (%d)\r\n", strerror(-err), err);
-      }
-   }
-
-   // Open the numbers file
-   printf("Opening \"/fs/numbers.txt\"... \r\n");
-   fflush(stdout);
-   FILE *f = fopen("/fs/numbers.txt", "r+");
-   printf("%s\r\n", (!f ? "Fail :(" : "OK"));
-   if (!f)
-   {
-      // Create the numbers file if it doesn't exist
-      printf("No file found, creating a new file... \r\n");
-      fflush(stdout);
-      f = fopen("/fs/numbers.txt", "w+");
-      printf("%s\r\n", (!f ? "Fail :(" : "OK"));
-      if (!f)
-      {
-         error("error: %s (%d)\r\n", strerror(errno), -errno);
-      }
-
-      for (int i = 0; i < 10; i++)
-      {
-         printf("\rWriting numbers (%d/%d)... ", i, 10);
-         fflush(stdout);
-         err = fprintf(f, "    %d\n", i);
-         if (err < 0)
-         {
-            printf("Fail :(\n");
-            error("error: %s (%d)\r\n", strerror(errno), -errno);
-         }
-      }
-      printf("\rWriting numbers (%d/%d)... OK\n", 10, 10);
-
-      printf("Seeking file... ");
-      fflush(stdout);
-      err = fseek(f, 0, SEEK_SET);
-      printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
-      if (err < 0)
-      {
-         error("error: %s (%d)\n", strerror(errno), -errno);
-      }
-   }
-
-   // Go through and increment the numbers
-   for (int i = 0; i < 10; i++)
-   {
-      printf("\rIncrementing numbers (%d/%d)... ", i, 10);
-      fflush(stdout);
-
-      // Get current stream position
-      long pos = ftell(f);
-
-      // Parse out the number and increment
-      int32_t number;
-      fscanf(f, "%d", &number);
-      number += 1;
-
-      // Seek to beginning of number
-      fseek(f, pos, SEEK_SET);
-    
-      // Store number
-      fprintf(f, "    %d\n", number);
-
-      // Flush between write and read on same file
-      fflush(f);
-   }
-   printf("\rIncrementing numbers (%d/%d)... OK\n", 10, 10);
-
-   // Close the file which also flushes any cached writes
-   printf("Closing \"/fs/numbers.txt\"... ");
-   fflush(stdout);
-   err = fclose(f);
-   printf("%s\r\n", (err < 0 ? "Fail :(" : "OK"));
-   if (err < 0)
-   {
-      error("error: %s (%d)\r\n", strerror(errno), -errno);
    }
     
    // Display the root directory
@@ -212,6 +96,38 @@ int main()
       }
 
       printf("    %s\r\n", e->d_name);
+      int le = strlen(e->d_name);
+      char *p = e->d_name + le;
+      if (le > 4)
+      {
+         char *p = e->d_name + le;
+         p -= 4;
+         if (strcmp(p, ".mid") == 0)
+         {
+            printf("midi file\r\n");
+
+            unsigned int notectr = 0;
+            char fn[100];
+            strcpy(fn, "/fs/");
+            strcat(fn, e->d_name);
+            
+            // start the timer
+            t.start();
+
+            mf.parse(fn, [&notectr]()
+            {
+               //printf("note on/off");
+               notectr++;
+               rtos::ThisThread::sleep_for(20); // time in ms
+            });
+
+            // stop the timer
+            t.stop();
+            printf("The time taken was %f seconds\n", t.read());
+            
+            printf("notectr %u\r\n", notectr);
+         }
+      }
    }
 
    printf("Closing the root directory... ");
@@ -221,32 +137,6 @@ int main()
    if (err < 0)
    {
       error("error: %s (%d)\r\n", strerror(errno), -errno);
-   }
-
-   // Display the numbers file
-   printf("Opening \"/fs/numbers.txt\"... ");
-   fflush(stdout);
-   f = fopen("/fs/numbers.txt", "r");
-   printf("%s\r\n", (!f ? "Fail :(" : "OK"));
-   if (!f)
-   {
-      error("error: %s (%d)\r\n", strerror(errno), -errno);
-   }
-
-   printf("numbers:\r\n");
-   while (!feof(f))
-   {
-      int c = fgetc(f);
-      printf("%c", c);
-   }
-
-   printf("\rClosing \"/fs/numbers.txt\"... ");
-   fflush(stdout);
-   err = fclose(f);
-   printf("%s\r\n", (err < 0 ? "Fail :(" : "OK"));
-   if (err < 0)
-   {
-      error("error: %s (%d)\n", strerror(errno), -errno);
    }
 
    // Tidy up
@@ -259,7 +149,7 @@ int main()
       error("error: %s (%d)\r\n", strerror(-err), err);
    }
         
-   printf("Mbed OS filesystem example done!\r\n");
+   printf("Mbed OS midi player done!\r\n");
 }
 
 
