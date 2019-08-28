@@ -102,8 +102,15 @@ unsigned int MidiFile::read_var_len_val(FILE *fp)
 }
 
 
+unsigned int MidiFile::delta_to_ms(unsigned int dlt)
+{
+   //printf("tempo upb %d %d\r\n", tempo, upb);
+   double tick_ms = ((double) tempo)/((double) upb);
+   tick_ms /= 1000.0; // convert µs to ms
+   return (unsigned int)(((double) dlt) * tick_ms);
+}
 
-int MidiFile::parse(char *fn, std::function<void(void)> notefu)
+int MidiFile::parse(char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu)
 {
    if (debug) printf("start midireader\n");
 
@@ -151,7 +158,7 @@ int MidiFile::parse(char *fn, std::function<void(void)> notefu)
                unsigned long  trlen = read_4b_length(fp);
                if (debug) printf("track length in bytes %ld\n", trlen);
                
-               /* unsigned int delta = */ read_var_len_val(fp);
+               unsigned int delta = read_var_len_val(fp);
                unsigned char type = read_char(fp);
                
                bool reading = true;
@@ -273,7 +280,7 @@ int MidiFile::parse(char *fn, std::function<void(void)> notefu)
                      unsigned char note = read_char(fp);
                      unsigned char velo = read_char(fp);
                      if (debug) printf("note on/off %d %d\n", note, velo);
-                     notefu();
+                     notefu(delta, type, note, velo);
                   }
                   else
                   if ((type & 0xf0) == 0xa0)
@@ -315,7 +322,7 @@ int MidiFile::parse(char *fn, std::function<void(void)> notefu)
                   }
                   if (reading)
                   {
-                     /* delta = */ read_var_len_val(fp);
+                     delta = read_var_len_val(fp);
                      type  = read_char(fp);
                   }
                }

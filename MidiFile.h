@@ -32,11 +32,12 @@ private:
    unsigned long read_3b_integer(FILE *fp);
    unsigned long read_4b_length(FILE *fp);
    unsigned char read_char(FILE *fp);
-   unsigned int read_var_len_val(FILE *fp);
+   unsigned int  read_var_len_val(FILE *fp);
 
 public:
    MidiFile();
-   int parse(char *fn, std::function<void(void)> notefu);
+   int parse(char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu);
+   unsigned int delta_to_ms(unsigned int dlt);
 };
 
 #endif

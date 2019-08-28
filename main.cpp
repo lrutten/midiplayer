@@ -59,12 +59,15 @@ FATFileSystem fs("fs");
 MidiFile mf;
 Timer    t;
 
+Serial midiout(PA_0, PA_1); // Serial4
+
 
 // Entry point for the example
 int main()
 {
    printf("--- Mbed OS midi player ---\r\n");
-
+   midiout.baud(31250);
+   
    // Try to mount the filesystem
    printf("Mounting the filesystem... \r\n");
    fflush(stdout);
@@ -114,11 +117,21 @@ int main()
             // start the timer
             t.start();
 
-            mf.parse(fn, [&notectr]()
+            mf.parse(fn, [&notectr](unsigned int delta, unsigned char type, unsigned char note, unsigned char velo)
             {
-               //printf("note on/off");
+               printf("note on/off %ld, %x, %d, %d\r\n", delta, type, note, velo);
                notectr++;
-               rtos::ThisThread::sleep_for(20); // time in ms
+               
+               midiout.putc(type);
+               midiout.putc(note);
+               midiout.putc(velo);
+               
+               unsigned int delta_ms = mf.delta_to_ms(delta);
+               printf("delta_ms %d\r\n", delta_ms);
+               if (delta_ms > 0)
+               {
+                  rtos::ThisThread::sleep_for(delta_ms); // time in ms
+               }
             });
 
             // stop the timer
