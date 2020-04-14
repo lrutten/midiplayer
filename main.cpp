@@ -7,27 +7,14 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <Adafruit_GFX.h>
+#include <Adafruit_SH1106.h>
+
 #if COMPONENT_SD
 #include "SDBlockDevice.h"
 #endif 
 
 #include "MidiFile.h"
-
-/*
-DigitalOut led1(LED1);
-
-
-int main()
-{
-   int  count = 0;
-
-   while (true)
-   {
-      led1 = !led1;
-      wait_ms(500);
-   }
-}
- */
 
 
 
@@ -61,10 +48,30 @@ Timer    t;
 
 Serial midiout(PA_0, PA_1); // Serial4
 
+Adafruit_SH1106 display;    // OLED display
+
+const uint8_t hline = 8;
 
 // Entry point for the example
 int main()
 {
+   display.begin(SH1106_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x64)
+   display.clearDisplay();
+
+   // Show the welcome text
+   display.setTextSize(1);
+   display.setTextColor(WHITE);
+   display.setCursor(0, 0);
+   display.println("Midiplayer 14/ 4/2020 voor Alver");
+
+   display.setTextSize(2);
+   display.setCursor(0, 3*hline);
+   display.println("Welkom");
+
+   display.display();
+   
+   ThisThread::sleep_for(3000);
+   
    printf("--- Mbed OS midi player ---\r\n");
    midiout.baud(31250);
    
@@ -98,6 +105,13 @@ int main()
          break;
       }
 
+      // Show dir. name
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setCursor(0, 5*hline);
+      display.println(e->d_name);
+      display.display();
+      
       printf("    %s\r\n", e->d_name);
       int le = strlen(e->d_name);
       char *p = e->d_name + le;

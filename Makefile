@@ -35,5 +35,5 @@ ddd: compile-debug
 	ddd --debugger arm-none-eabi-gdb BUILD/NUCLEO_F446RE/GCC_ARM/midiplayer.elf
 
 gdb: compile-debug
-	arm-none-eabi-gdb -ex "target remote localhost:3333" -ex "load" -ex "continue" BUILD/NUCLEO_F446RE/GCC_ARM-DEBUG/midiplayer.elf
+	arm-none-eabi-gdb -q -ex "target remote localhost:3333" -ex "load" -ex "continue" BUILD/NUCLEO_F446RE/GCC_ARM-DEBUG/midiplayer.elf
 
