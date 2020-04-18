@@ -136,16 +136,16 @@ int main()
                printf("note on/off %ld, %x, %d, %d\r\n", delta, type, note, velo);
                notectr++;
                
-               midiout.putc(type);
-               midiout.putc(note);
-               midiout.putc(velo);
-               
                unsigned int delta_ms = mf.delta_to_ms(delta);
                printf("delta_ms %d\r\n", delta_ms);
                if (delta_ms > 0)
                {
                   rtos::ThisThread::sleep_for(delta_ms); // time in ms
                }
+
+               midiout.putc(type);
+               midiout.putc(note);
+               midiout.putc(velo);
             });
 
             // stop the timer
