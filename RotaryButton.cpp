@@ -81,8 +81,8 @@ void RotaryButton::start()
  */
 void RotaryButton::buttonARise()
 {
-   disableA();
-   enableB();
+   //disableA();
+   //enableB();
    ar++;
 
    Msg *msg = alloc();
@@ -95,8 +95,8 @@ void RotaryButton::buttonARise()
 
 void RotaryButton::buttonAFall()
 {
-   disableA();
-   enableB();
+   //disableA();
+   //enableB();
    af++;
 
    Msg *msg = alloc();
@@ -109,8 +109,8 @@ void RotaryButton::buttonAFall()
 
 void RotaryButton::buttonBRise()
 {
-   disableB();
-   enableA();
+   //disableB();
+   //enableA();
    br++;
 
    Msg *msg = alloc();
@@ -123,8 +123,8 @@ void RotaryButton::buttonBRise()
 
 void RotaryButton::buttonBFall()
 {
-   disableB();
-   enableA();
+   //disableB();
+   //enableA();
    bf++;
 
    Msg *msg = alloc();
@@ -175,7 +175,7 @@ uint8_t RotaryButton::getStableButtons()
          ThisThread::sleep_for(time);
       }
    }
-   blog("   stable w %d\r\n", w);
+   //blog("   stable w %d\r\n", w);
    
    return w;
 }
@@ -183,8 +183,9 @@ uint8_t RotaryButton::getStableButtons()
 void RotaryButton::send(MsgType t)
 {
    const int diff = 2;
-   printf("send %c %d %d\r\n", t, lastpos, pos);
+   //printf("send %c %d %d\r\n", t, lastpos, pos);
 
+   /*
    bool snd = false;
    if (t == M_UP)
    {
@@ -201,10 +202,10 @@ void RotaryButton::send(MsgType t)
          snd = true;
       }
    }
-
-   if (controller != NULL && snd)
+    */
+   if (controller != NULL)
    {
-      lastpos = pos;
+      //lastpos = pos;
       controller->send(t);
    }
 }
@@ -215,6 +216,8 @@ void RotaryButton::send(MsgType t)
    It will also receive a M_TEST message after 20 s.
    This is a test for the AfterTime class.
  */
+ 
+
 void RotaryButton::run()
 {
    blog("RotaryButton::run()\r\n");
@@ -224,7 +227,6 @@ void RotaryButton::run()
 
    bool    block = false;
    MsgType t;
-   //uint8_t pos = 0;
    uint8_t v   = getButtons();
    uint8_t w   = v;
    bool    snd = false;
@@ -254,13 +256,13 @@ void RotaryButton::run()
             w |= 2;
             break;
          case M_BDN:
-            w &= 2;
+            w &= ~2;
             break;
          }
 
          if (!block)
          {
-            uint8_t w = getButtons();
+            w = getButtons();
             if (w != v)
             {
                switch (v)
@@ -331,10 +333,10 @@ void RotaryButton::run()
                {
                   snd = false;
                   blog("%c: %d->%d - %3d - %d %d %d %d\r\n", t, v, w, pos, ar, af, br, bf);
-                  ar = 0;
-                  af = 0;
-                  br = 0;
-                  bf = 0;
+                  //ar = 0;
+                  //af = 0;
+                  //br = 0;
+                  //bf = 0;
                }
                v = w;
    
@@ -346,4 +348,3 @@ void RotaryButton::run()
       }
    }
 }
-

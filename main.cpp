@@ -1,14 +1,15 @@
 /* 
-   Midiplayer 24/ 4/2020
+   Midiplayer 28/ 4/2020
  */
 
 #include "mbed.h"
 
-#include "Controller.h"
-#include "RotaryButton.h"
 
-Controller   controller;
-RotaryButton button;
+#include "Controller.h"
+#include "RotaryButtonPoll.h"
+
+Controller       controller;
+RotaryButtonPoll button;
 
 int main()
 {
@@ -21,4 +22,3 @@ int main()
       ThisThread::sleep_for(3000);
    }
 }
-
