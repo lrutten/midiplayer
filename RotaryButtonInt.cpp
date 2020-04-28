@@ -1,14 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2018 Rediscover.
+ * Copyright (c) 2020 Rooi.
  *
  *******************************************************************************/
 
-#include "RotaryButton.h"
+/*
+   This version of the rotary button decoder uses interrupts for the A and B inputs.
+   Unfortunately the approach results in an overrun error on the ISR queue.
+ */
+
+#include "RotaryButtonInt.h"
 #include "AfterTime.h"
 
-#define ROTARYBUTTON_DEBUG 1
+#define ROTARYBUTTONINT_DEBUG 1
 
-#ifdef ROTARYBUTTON_DEBUG
+#ifdef ROTARYBUTTONINT_DEBUG
 #define blog(fmt, args...)    printf(fmt, ## args)
 #else
 #define blog(fmt, args...)    /* Don't do anything in release builds */
@@ -17,7 +22,7 @@
 /*!
    Constructor for Button.
  */
-RotaryButton::RotaryButton() : controller(NULL),
+RotaryButtonInt::RotaryButtonInt() : controller(NULL),
    buttonA(PC_0), 
    buttonB(PC_1), 
    pos(0),
@@ -29,30 +34,30 @@ RotaryButton::RotaryButton() : controller(NULL),
 {
 }
 
-void RotaryButton::setController(Controller *cnt)
+void RotaryButtonInt::setController(Controller *cnt)
 {
    controller = cnt;
 }
 
-void RotaryButton::enableA()
+void RotaryButtonInt::enableA()
 {
-   buttonA.rise(mbed::callback(this, &RotaryButton::buttonARise));
-   buttonA.fall(mbed::callback(this, &RotaryButton::buttonAFall));
+   buttonA.rise(mbed::callback(this, &RotaryButtonInt::buttonARise));
+   buttonA.fall(mbed::callback(this, &RotaryButtonInt::buttonAFall));
 }
 
-void RotaryButton::disableA()
+void RotaryButtonInt::disableA()
 {
    buttonA.rise(NULL);
    buttonA.fall(NULL);
 }
 
-void RotaryButton::enableB()
+void RotaryButtonInt::enableB()
 {
-   buttonB.rise(mbed::callback(this, &RotaryButton::buttonBRise));
-   buttonB.fall(mbed::callback(this, &RotaryButton::buttonBFall));
+   buttonB.rise(mbed::callback(this, &RotaryButtonInt::buttonBRise));
+   buttonB.fall(mbed::callback(this, &RotaryButtonInt::buttonBFall));
 }
 
-void RotaryButton::disableB()
+void RotaryButtonInt::disableB()
 {
    buttonB.rise(NULL);
    buttonB.fall(NULL);
@@ -63,9 +68,9 @@ void RotaryButton::disableB()
    At the start a callback is registered for the rising edge
    and the thread is started.
  */
-void RotaryButton::start()
+void RotaryButtonInt::start()
 {
-   blog("RotaryButton::start()\r\n");
+   blog("RotaryButtonInt::start()\r\n");
 
    enableA();
    enableB();
@@ -79,7 +84,7 @@ void RotaryButton::start()
    be running in ISR mode. Instead of calling printf() a message
    is sent to the RotaryButton mailbox.
  */
-void RotaryButton::buttonARise()
+void RotaryButtonInt::buttonARise()
 {
    //disableA();
    //enableB();
@@ -93,7 +98,7 @@ void RotaryButton::buttonARise()
    }
 }
 
-void RotaryButton::buttonAFall()
+void RotaryButtonInt::buttonAFall()
 {
    //disableA();
    //enableB();
@@ -107,7 +112,7 @@ void RotaryButton::buttonAFall()
    }
 }
 
-void RotaryButton::buttonBRise()
+void RotaryButtonInt::buttonBRise()
 {
    //disableB();
    //enableA();
@@ -121,7 +126,7 @@ void RotaryButton::buttonBRise()
    }
 }
 
-void RotaryButton::buttonBFall()
+void RotaryButtonInt::buttonBFall()
 {
    //disableB();
    //enableA();
@@ -142,12 +147,12 @@ int RotaryButton::getCount()
 }
  */
 
-uint8_t RotaryButton::getButtons()
+uint8_t RotaryButtonInt::getButtons()
 {
    return (buttonA.read() & 0x01) | ((buttonB.read() & 0x01) << 1 );
 }
 
-uint8_t RotaryButton::getStableButtons()
+uint8_t RotaryButtonInt::getStableButtons()
 {
    const int     time = 1;
    const uint8_t n    = 2;
@@ -180,7 +185,7 @@ uint8_t RotaryButton::getStableButtons()
    return w;
 }
 
-void RotaryButton::send(MsgType t)
+void RotaryButtonInt::send(MsgType t)
 {
    const int diff = 2;
    //printf("send %c %d %d\r\n", t, lastpos, pos);
@@ -218,9 +223,9 @@ void RotaryButton::send(MsgType t)
  */
  
 
-void RotaryButton::run()
+void RotaryButtonInt::run()
 {
-   blog("RotaryButton::run()\r\n");
+   blog("RotaryButtonInt::run()\r\n");
 
    AfterTime after;
    //after.sendAfter(this, 2000, M_UNB);

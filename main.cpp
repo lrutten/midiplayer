@@ -6,10 +6,10 @@
 
 
 #include "Controller.h"
-#include "RotaryButtonPoll.h"
+#include "RotaryButton.h"
 
-Controller       controller;
-RotaryButtonPoll button;
+Controller   controller;
+RotaryButton button;
 
 int main()
 {

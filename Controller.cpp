@@ -170,7 +170,7 @@ void Controller::run()
    display.setTextSize(1);
    display.setTextColor(WHITE);
    display.setCursor(0, 0);
-   display.println("Midiplayer 25/ 4/2020 voor Alver");
+   display.println("Midiplayer 28/ 4/2020 voor Alver");
 
    display.setTextSize(2);
    display.setCursor(0, 3*hline);

@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2018 Rediscover.
+ * Copyright (c) 2020 Rooi.
  *
  *******************************************************************************/
 
-#ifndef ROTARYBUTTON_H
-#define ROTARYBUTTON_H
+#ifndef ROTARYBUTTONINT_H
+#define ROTARYBUTTONINT_H
 
 #include "Actor.h"
 #include "Controller.h"
@@ -12,12 +12,12 @@
 /*!
    \brief rotary button actor
    
-   RotaryButton is an actor for testing the user button.
+   RotaryButtonInt is an actor for the rotary button.
  */
-class RotaryButton : public Actor
+class RotaryButtonInt : public Actor
 {
 public:
-   RotaryButton();
+   RotaryButtonInt();
 
    void    start();
    void    buttonARise();

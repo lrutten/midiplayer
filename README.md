@@ -1,6 +1,14 @@
 # Midi player on NUCLEO-F446RE
 
-To be documented.
+This project implements a midi player on a NUCLEO-F446RE board.
+
+At the start of the program it reads the root directory of the sdcard
+of shows the list of files on the 128x64 OLED display.
+Turning the knob allows one to choose the file to be played.
+A push on the knob starts the playing.
+
+The MIDI events are sent to the UART which is connected to the 5 pin DIN connector.
+
 
 ## Connection sd card reader
 
@@ -24,6 +32,10 @@ typedef enum {
 
 Only the SPI definitions are mentioned in the preceding example.
 
+
+## OLED display
+
+## Rotary button decoder
 
 ## Links
 

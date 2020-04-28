@@ -1,12 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2018 Rediscover.
+ * Copyright (c) 2020 Rooi.
  *
  *******************************************************************************/
 
-#include "RotaryButtonPoll.h"
+/*
+   This is the polling version of the rotary button decoder.
+   The polling period is now 5ms.
+   The client of this encoder receives a M_UP message at the
+   rising adge of A end a M_DOWN message at the falling edge of B.
+ */
 
-#define ROTARYBUTTONPOLL_DEBUG 1
-#ifdef ROTARYBUTTONPOLL_DEBUG
+#include "RotaryButton.h"
+
+#define ROTARYBUTTON_DEBUG 1
+#ifdef ROTARYBUTTON_DEBUG
 #define blog(fmt, args...)    printf(fmt, ## args)
 #else
 #define blog(fmt, args...)    /* Don't do anything in release builds */
@@ -15,7 +22,7 @@
 /*!
    Constructor for Button.
  */
-RotaryButtonPoll::RotaryButtonPoll() : controller(NULL),
+RotaryButton::RotaryButton() : controller(NULL),
    buttonA(PC_0), 
    buttonB(PC_1),
    led(LED1),
@@ -27,51 +34,38 @@ RotaryButtonPoll::RotaryButtonPoll() : controller(NULL),
 {
 }
 
-void RotaryButtonPoll::setController(Controller *cnt)
+/*!
+   Set the client of this decoder.
+ */
+void RotaryButton::setController(Controller *cnt)
 {
    controller = cnt;
 }
 
 /*!
-   At the start a callback is registered for the rising edge
+   At the start a callback is registered for the ticker
    and the thread is started.
  */
-void RotaryButtonPoll::start()
+void RotaryButton::start()
 {
    blog("RotaryButtonPoll::start()\r\n");
 
-   timeout.attach_us(mbed::callback(this, &RotaryButtonPoll::timeHandler), 5000);
+   timeout.attach_us(mbed::callback(this, &RotaryButton::timeHandler), 5000);
    
    Actor::start();
 }
 
-/* 
-void RotaryButton::buttonARise()
-{
-   //disableA();
-   //enableB();
-   ar++;
-
-   Msg *msg = alloc();
-   if (msg != NULL)
-   {
-      msg->type = M_AUP;
-      put(msg);
-   }
-}
+/*!
+   This method is called every 5ms.
  */
-
-void RotaryButtonPoll::timeHandler()
+void RotaryButton::timeHandler()
 {
-   //led = !led;
-   //count++;
-   
    // buttonA
    stateA = (stateA << 1) | (buttonA & 1) | 0xfe00;
    if (stateA == 0xff00)
    {
       // rising edge
-      led = 1;
+      led = !led;
       count++;
 
       Msg *msg = alloc();
@@ -85,8 +79,6 @@ void RotaryButtonPoll::timeHandler()
    if (stateA == 0xfeff)
    {
       // falling edge
-      led = 0;
-
       Msg *msg = alloc();
       if (msg != NULL)
       {
@@ -122,13 +114,18 @@ void RotaryButtonPoll::timeHandler()
  
  
 
-uint8_t RotaryButtonPoll::getButtons()
+/*!
+   Read the A and B inputs.
+ */
+uint8_t RotaryButton::getButtons()
 {
    return (buttonA.read() & 0x01) | ((buttonB.read() & 0x01) << 1 );
 }
 
-
-void RotaryButtonPoll::send(MsgType t)
+/*!
+   Send the message to the client.
+ */
+void RotaryButton::send(MsgType t)
 {
    if (controller != NULL)
    {
@@ -137,11 +134,11 @@ void RotaryButtonPoll::send(MsgType t)
 }
 
 /*!
-   This is the RotaryButtonPoll thread.
+   This is the RotaryButton thread.
  */
-void RotaryButtonPoll::run()
+void RotaryButton::run()
 {
-   blog("RotaryButtonPoll::run()\r\n");
+   blog("RotaryButton::run()\r\n");
 
    int     pos = 0;
    uint8_t v   = 3;
@@ -152,8 +149,6 @@ void RotaryButtonPoll::run()
       Msg *m = get();
       t = m->type;
       free(m);
-
-      //blog("%c %d\r\n", t, count); 
 
       switch (t)
       {
@@ -177,13 +172,13 @@ void RotaryButtonPoll::run()
          if (w == 1)
          {
             pos++;
-            send(M_UP);
+            send(M_DOWN);
          }
          else
          if (w == 2)
          {
             pos--;
-            send(M_DOWN);
+            send(M_UP);
          }
          break;
       case 1:

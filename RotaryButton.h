@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Rediscover.
+ * Copyright (c) 2020 Rooi.
  *
  *******************************************************************************/
 
@@ -12,12 +12,12 @@
 /*!
    \brief rotary button actor
    
-   RotaryButton is an actor for testing the user button.
+   RotaryButton is the polling actor for the rotary button.
  */
-class RotaryButtonPoll : public Actor
+class RotaryButton : public Actor
 {
 public:
-   RotaryButtonPoll();
+   RotaryButton();
 
    void    start();
    void    run();
