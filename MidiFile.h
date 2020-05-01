@@ -36,7 +36,7 @@ private:
 
 public:
    MidiFile();
-   int parse(char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu);
+   int parse(const char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu);
    unsigned int delta_to_ms(unsigned int dlt);
 };
 

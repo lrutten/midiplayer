@@ -110,7 +110,7 @@ unsigned int MidiFile::delta_to_ms(unsigned int dlt)
    return (unsigned int)(((double) dlt) * tick_ms);
 }
 
-int MidiFile::parse(char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu)
+int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu)
 {
    if (debug) printf("start midireader\n");
 

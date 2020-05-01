@@ -38,6 +38,9 @@ public:
    int         size();
    const char *get(int i);
    bool        isCurr(int i);
+   const char *getCurr();
+   const char *getCurrFull();
+   bool        isCurrMidi();
    void        down();
    void        up();
    
@@ -48,6 +51,7 @@ private:
    int                      curr;  // current file
 };
 
+class RotaryButton;
 
 /*!
    \brief controller actor
@@ -61,8 +65,10 @@ public:
 
    void start();
    void run();
-   void doe();
+   // void doe();
+   void play();
    void displayList();
+   void setRotaryButton(RotaryButton *bu);
 
 private:
    SDBlockDevice  *bd;
@@ -72,6 +78,7 @@ private:
    Serial          midiout;  // Serial4
    Adafruit_SH1106 display;  // OLED display
    DirList         dirlist;
+   RotaryButton   *button;
    
    static const uint8_t hline;
    static const uint8_t wchar;

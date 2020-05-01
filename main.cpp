@@ -14,6 +14,8 @@ RotaryButton button;
 int main()
 {
    button.setController(&controller);
+   controller.setRotaryButton(&button);
+   
    controller.start();
    button.start();
 

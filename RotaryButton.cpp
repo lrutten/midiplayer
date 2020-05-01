@@ -7,12 +7,14 @@
    This is the polling version of the rotary button decoder.
    The polling period is now 5ms.
    The client of this encoder receives a M_UP message at the
-   rising adge of A end a M_DOWN message at the falling edge of B.
+   rising edge of A end a M_DOWN message at the falling edge of B.
  */
 
 #include "RotaryButton.h"
 
-#define ROTARYBUTTON_DEBUG 1
+#include "Controller.h"
+
+// #define ROTARYBUTTON_DEBUG 1
 #ifdef ROTARYBUTTON_DEBUG
 #define blog(fmt, args...)    printf(fmt, ## args)
 #else
@@ -26,11 +28,17 @@ RotaryButton::RotaryButton() : controller(NULL),
    buttonA(PC_0), 
    buttonB(PC_1),
    led(LED1),
+   red(PC_8),
+   green(PC_6),
+   blue(PC_5),
+   buttonP(PC_4),
    count(0),
    stateA(0xffff),
    lastA(1),
    stateB(0xffff),
-   lastB(1)
+   lastB(1),
+   stateP(0xfe00),
+   lastP(0)
 {
 }
 
@@ -42,6 +50,49 @@ void RotaryButton::setController(Controller *cnt)
    controller = cnt;
 }
 
+void RotaryButton::setRed(uint8_t v)
+{
+   if (v != 0)
+   {
+      red = 0;
+   }
+   else
+   {
+      red = 1;
+   }
+}
+
+void RotaryButton::setGreen(uint8_t v)
+{
+   if (v != 0)
+   {
+      green = 0;
+   }
+   else
+   {
+      green = 1;
+   }
+}
+
+void RotaryButton::setBlue(uint8_t v)
+{
+   if (v != 0)
+   {
+      blue = 0;
+   }
+   else
+   {
+      blue = 1;
+   }
+}
+
+void RotaryButton::setRGB(uint8_t r, uint8_t g, uint8_t b)
+{
+   setRed(r);
+   setGreen(g);
+   setBlue(b);
+}
+
 /*!
    At the start a callback is registered for the ticker
    and the thread is started.
@@ -50,6 +101,9 @@ void RotaryButton::start()
 {
    blog("RotaryButtonPoll::start()\r\n");
 
+   red   = 1;
+   green = 1;
+   blue  = 1;
    timeout.attach_us(mbed::callback(this, &RotaryButton::timeHandler), 5000);
    
    Actor::start();
@@ -109,6 +163,24 @@ void RotaryButton::timeHandler()
          msg->type = M_BDN;
          put(msg);
       }
+   }
+
+   // buttonP
+   stateP = (stateP << 1) | (buttonP & 1) | 0xfe00;
+   if (stateP == 0xff00)
+   {
+      // release
+      //green = 0;
+      //blue  = 1;
+      send(M_REL);
+   }
+   else
+   if (stateP == 0xfeff)
+   {
+      // push
+      //green = 1;
+      //blue  = 0;
+      send(M_PUSH);
    }
 }
  
@@ -222,7 +294,28 @@ void RotaryButton::run()
          break;
       }
 
-      blog("%d %c: %d->%d - %d\r\n", count, t, v, w, pos);
+      /*
+      switch (pos % 3)
+      {
+      case 0:
+         red   = 1;
+         green = 0;
+         blue  = 0;
+         break;
+      case 1:
+         red   = 0;
+         green = 1;
+         blue  = 0;
+         break;
+      case 2:
+         red   = 0;
+         green = 0;
+         blue  = 1;
+         break;
+      }
+       */
+      uint8_t pb = buttonP.read() & 1;   
+      blog("%d %c: %d->%d - %d - pb <%d>\r\n", count, t, v, w, pos, pb);
       v = w;
    }
 }
