@@ -195,11 +195,11 @@ void Controller::play()
    const char *fln =  dirlist.getCurrFull();
    mf.parse(fln, [this, &notectr](unsigned int delta, unsigned char type, unsigned char note, unsigned char velo)
    {
-      printf("note on/off %ld, %x, %d, %d\r\n", delta, type, note, velo);
+      //printf("note ooo %ld, %x, %d\r\n", delta, type, note);
       notectr++;
       
       unsigned int delta_ms = mf.delta_to_ms(delta);
-      printf("delta_ms %d\r\n", delta_ms);
+      //printf("dms %d\r\n", delta_ms);
       if (delta_ms > 0)
       {
          rtos::ThisThread::sleep_for(delta_ms); // time in ms

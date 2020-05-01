@@ -15,7 +15,7 @@ unsigned short MidiFile::read_2b_integer(FILE *fp)
    int r = fread(buf, 1, 2, fp);
    if (r == 2)
    {
-      if (debug) printf("integer in 2 bytes: %x %x\n", buf[0], buf[1]);
+      if (debug) printf("integer in 2 bytes: %x %x\r\n", buf[0], buf[1]);
       bufb[0] = buf[1];
       bufb[1] = buf[0];
       unsigned short *ps = (unsigned short *) bufb;
@@ -32,7 +32,7 @@ unsigned long MidiFile::read_3b_integer(FILE *fp)
    int r = fread(buf, 1, 3, fp);
    if (r == 3)
    {
-      if (debug) printf("length in 3 bytes: %x %x %x\n", buf[0], buf[1], buf[2]);
+      if (debug) printf("length in 3 bytes: %x %x %x\r\n", buf[0], buf[1], buf[2]);
       bufb[0] = buf[2];
       bufb[1] = buf[1];
       bufb[2] = buf[0];
@@ -51,7 +51,7 @@ unsigned long MidiFile::read_4b_length(FILE *fp)
    int r = fread(buf, 1, 4, fp);
    if (r == 4)
    {
-      if (debug) printf("length in 4 bytes: %x %x %x %x\n", buf[0], buf[1], buf[2], buf[3]);
+      if (debug) printf("length in 4 bytes: %x %x %x %x\r\n", buf[0], buf[1], buf[2], buf[3]);
       bufb[0] = buf[3];
       bufb[1] = buf[2];
       bufb[2] = buf[1];
@@ -80,7 +80,7 @@ unsigned int MidiFile::read_var_len_val(FILE *fp)
    bool          reading  = true;
 
    fread(&c, 1, 1, fp);
-   if (debug) printf("   bytea %x\n", c);
+   if (debug) printf("   bytea %x\r\n", c);
    while (reading)
    {
       value = (value << 7) + (c & 0x7f);
@@ -88,7 +88,7 @@ unsigned int MidiFile::read_var_len_val(FILE *fp)
       if ((c & 0x80) != 0)
       {
          fread(&c, 1, 1, fp);
-         if (debug) printf("   byteb %x\n", c);
+         if (debug) printf("   byteb %x\r\n", c);
       }
       else
       {
@@ -96,7 +96,7 @@ unsigned int MidiFile::read_var_len_val(FILE *fp)
       }
    }
 
-   if (debug) printf("read var len value %d\n", value);
+   if (debug) printf("read var len value %d\r\n", value);
 
    return value;
 }
@@ -112,27 +112,27 @@ unsigned int MidiFile::delta_to_ms(unsigned int dlt)
 
 int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu)
 {
-   if (debug) printf("start midireader\n");
+   if (debug) printf("start midireader\r\n");
 
    FILE *fp = fopen(fn, "r");
    if (fp == NULL)
    {
-      if (debug) printf("error at fopen\n");
+      if (debug) printf("error at fopen\r\n");
    }
 
-   if (debug) printf("fopen ok\n");
+   if (debug) printf("fopen ok\r\n");
 
    char buf[20];
    int r = fread(buf, 1, 4, fp);
    if (r == 4)
    {
-      if (debug) printf("fread first 4 bytes ok\n");
+      if (debug) printf("fread first 4 bytes ok\r\n");
       buf[4] = '\0';
-      if (debug) printf("type %s\n", buf);
+      if (debug) printf("type %s\r\n", buf);
       
       if (strcmp(buf, "MThd") == 0)
       {
-         if (debug) printf("is header\n");
+         if (debug) printf("is header\r\n");
          
          
          total_length = read_4b_length(fp);
@@ -140,23 +140,23 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
          ntracks      = read_2b_integer(fp);
          upb          = read_2b_integer(fp); // units per beat
          
-         if (debug) printf("format  %d\n", format);
-         if (debug) printf("ntracks %d\n", ntracks);
-         if (debug) printf("upb     %d\n", upb);
+         if (debug) printf("format  %d\r\n", format);
+         if (debug) printf("ntracks %d\r\n", ntracks);
+         if (debug) printf("upb     %d\r\n", upb);
          
          int r = fread(buf, 1, 4, fp);
          if (r == 4)
          {
-            if (debug) printf("fread track 4 bytes ok\n");
+            if (debug) printf("fread track 4 bytes ok\r\n");
             buf[4] = '\0';
-            if (debug) printf("type %s\n", buf);
+            if (debug) printf("type %s\r\n", buf);
             
             if (strcmp(buf, "MTrk") == 0)
             {
-               if (debug) printf("is track\n");
+               if (debug) printf("is track\r\n");
 
                unsigned long  trlen = read_4b_length(fp);
-               if (debug) printf("track length in bytes %ld\n", trlen);
+               if (debug) printf("track length in bytes %ld\r\n", trlen);
                
                unsigned int delta = read_var_len_val(fp);
                unsigned char type = read_char(fp);
@@ -164,12 +164,12 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                bool reading = true;
                while (reading)
                {
-                  if (debug) printf("\n\ntype %x\n", type);
+                  if (debug) printf("\r\n\r\ntype %x\r\n", type);
                   if (type == 0xff)
                   {
-                     if (debug) printf("meta type\n");
+                     if (debug) printf("meta type\r\n");
                      unsigned char subtype = read_char(fp);
-                     if (debug) printf("subtype %x\n", subtype);
+                     if (debug) printf("subtype %x\r\n", subtype);
                      
                      unsigned int  melen;
                      /*
@@ -185,13 +185,17 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                      unsigned char not_32nd; // number of 32nd in quarter note 
                      */
                      melen = read_var_len_val(fp);
-                     if (debug) printf("melen %d\n", melen);
+                     if (debug) printf("melen %d\r\n", melen);
 
                      switch (subtype)
                      {
                         case 0x00:
                            // sequence number
-                           seqnr = read_2b_integer(fp);
+                           if (melen == 2)
+                           {
+                              // read only if present
+                              seqnr = read_2b_integer(fp);
+                           }
                            break;
                         case 0x01:
                            // text
@@ -200,7 +204,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                               text[i] = read_char(fp);
                            }
                            text[melen] = '\0';
-                           if (debug) printf("text %s\n", text);
+                           if (debug) printf("text %s\r\n", text);
                            break;
                         case 0x02:
                            // copyright notice
@@ -216,10 +220,14 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                               track_name[i] = read_char(fp);
                            }
                            track_name[melen] = '\0';
-                           if (debug) printf("track name %s\n", track_name);
+                           if (debug) printf("track name %s\r\n", track_name);
                            break;
                         case 0x04:
                            // instrument name
+                           for (unsigned int i = 0; i<melen; i++)
+                           {
+                              read_char(fp);
+                           }
                            break;
                         case 0x05:
                            // lyric text
@@ -249,19 +257,19 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                         case 0x51:
                            // tempo
                            tempo = read_3b_integer(fp);
-                           if (debug) printf("tempo %lu\n", tempo);
+                           if (debug) printf("tempo %lu\r\n", tempo);
                            break;
                         case 0x54:
                            // SMPTE offset
                            break;
                         case 0x58:
                            // time signature
-                           if (debug) printf("time signature\n");
+                           if (debug) printf("time signature\r\n");
                            tsig_num = read_char(fp);
                            tsig_den = read_char(fp);
                            mtro_tic = read_char(fp); // number of clock ticks per metronome
                            not_32nd = read_char(fp);
-                           if (debug) printf("time signature %d %d %d %d\n",
+                           if (debug) printf("time signature %d %d %d %d\r\n",
                               tsig_num, tsig_den, mtro_tic, not_32nd);
 
                            //reading = false;
@@ -279,7 +287,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                      // note on/off
                      unsigned char note = read_char(fp);
                      unsigned char velo = read_char(fp);
-                     if (debug) printf("note on/off %d %d\n", note, velo);
+                     if (debug) printf("note on/off %d %d\r\n", note, velo);
                      notefu(delta, type, note, velo);
                   }
                   else
@@ -293,8 +301,10 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                   if ((type & 0xf0) == 0xb0)
                   {
                      // controller
-                     read_char(fp);
-                     read_char(fp);
+                     unsigned char note = read_char(fp);
+                     unsigned char velo = read_char(fp);
+                     if (debug) printf("controller %d %d\r\n", note, velo);
+                     notefu(delta, type, note, velo);
                   }
                   else
                   if ((type & 0xf0) == 0xc0)
@@ -317,7 +327,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                   }
                   else
                   {
-                     if (debug) printf("error in format\n");
+                     if (debug) printf("error in format %x\r\n", type);
                      reading = false;
                   }
                   if (reading)
@@ -330,12 +340,12 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
          }
          else
          {
-            if (debug) printf("wrong track in first 4 bytes\n");
+            if (debug) printf("wrong track in first 4 bytes\r\n");
          }
       }
       else
       {
-         if (debug) printf("wrong header\n");
+         printf("wrong header\n");
          return 0;
       }
    }   
