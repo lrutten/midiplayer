@@ -47,9 +47,17 @@ Only the SPI definitions are mentioned in the preceding example.
 
     The MIDI format explained.
 
+* [http://www.personal.kent.edu/~sbirch/Music_Production/MP-II/MIDI/an_introduction_to_midi_contents.htm](http://www.personal.kent.edu/~sbirch/Music_Production/MP-II/MIDI/an_introduction_to_midi_contents.htm)
+
+    Another MIDI format description.
+
+* [https://tttapa.github.io/Arduino/MIDI/Chap00-Arduino-MIDI.html](https://tttapa.github.io/Arduino/MIDI/Chap00-Arduino-MIDI.html)
+
+   A Arduino Midi project with Midi, hardware and software description.
+
 * [https://github.com/ncu571633/midi_parser](https://github.com/ncu571633/midi_parser)
 
-    A parser for `iostream`, not suited for embed-os.
+    A parser for `iostream`, not suited for mbed-os.
 
 * [https://github.com/craigsapp/midifile](https://github.com/craigsapp/midifile)
 
