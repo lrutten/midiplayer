@@ -8,6 +8,8 @@
 #include "Controller.h"
 #include "RotaryButton.h"
 
+const bool MidiFile::debug = false;
+
 Controller   controller;
 RotaryButton button;
 
