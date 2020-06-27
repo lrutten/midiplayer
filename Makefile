@@ -7,7 +7,7 @@ deploy:
 	mbed deploy
 
 compile:
-	mbed compile -v --source ./src -t GCC_ARM -m NUCLEO_F446RE
+	mbed compile -v -t GCC_ARM -m NUCLEO_F446RE
 
 copy:
 	cp -v ./BUILD/NUCLEO_F446RE/GCC_ARM/midiplayer.bin /mnt/hd
