@@ -7,7 +7,7 @@ deploy:
 	mbed deploy
 
 compile:
-	mbed compile --source ./src -t GCC_ARM -m NUCLEO_F446RE
+	mbed compile -v --source ./src -t GCC_ARM -m NUCLEO_F446RE
 
 copy:
 	cp -v ./BUILD/NUCLEO_F446RE/GCC_ARM/midiplayer.bin /mnt/hd
@@ -29,7 +29,7 @@ clean-all:
 # Anders komen er compilatiefouten.
 add-mbed-os:
 	mbed add mbed-os
-	cd mbed-os; mbed update mbed-os-5.15.2
+	#cd mbed-os; mbed update mbed-os-5.15.2
 
 openocd:
 	openocd -f /usr/share/openocd/scripts/board/st_nucleo_f4.cfg
