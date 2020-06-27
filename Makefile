@@ -7,7 +7,7 @@ deploy:
 	mbed deploy
 
 compile:
-	mbed compile -v -t GCC_ARM -m NUCLEO_F446RE
+	mbed compile --source ./src -t GCC_ARM -m NUCLEO_F446RE
 
 copy:
 	cp -v ./BUILD/NUCLEO_F446RE/GCC_ARM/midiplayer.bin /mnt/hd
@@ -16,7 +16,7 @@ screen:
 	screen /dev/ttyACM0
 
 compile-debug:
-	mbed compile --source ./src -t GCC_ARM -m NUCLEO_F446RE --profile mbed-os/tools/profiles/debug.json
+	mbed compile -t GCC_ARM -m NUCLEO_F446RE --profile mbed-os/tools/profiles/debug.json
 
 clean:
 	rm -Rvf BUILD
