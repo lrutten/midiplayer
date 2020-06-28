@@ -21,7 +21,7 @@ public:
       int notectr = 0;   
       mf->parse(fln, [this, &notectr](unsigned int delta, unsigned char type, unsigned char note, unsigned char velo)
       {
-         printf("---> note ooo %ld, %x, %d\r\n", delta, type, note);
+         printf("---> note ooo %ld, %x, %d, %d\r\n", delta, type, note, velo);
          notectr++;
        
          unsigned int delta_ms = mf->delta_to_ms(delta);

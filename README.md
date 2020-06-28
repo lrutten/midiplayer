@@ -40,18 +40,18 @@ event is handled by the parser.
 | Track name          | `FF 03` | buffered, not used |
 | Instrument name     | `FF 04` | skip               |
 | Lyric text          | `FF 05` | skip               |
-| Marker text         | `FF 06` | skip, error?       |
-| Cue point           | `FF 07` | skip, error?       |
-| Program name        | `FF 08` | not detected       |
-| Device name         | `FF 09` | not detected       |
+| Marker text         | `FF 06` | skip               |
+| Cue point           | `FF 07` | skip               |
+| Program name        | `FF 08` | skip               |
+| Device name         | `FF 09` | skip               |
 | MIDI channel prefix | `FF 20` | skip               |
 | MIDI port           | `FF 21` | skip               |
 | Track end           | `FF 2F` | stop               |
-| Tempo               | `FF 51` | buffered, not used |
-| SMPTE offset        | `FF 54` | skip, error?       |
+| Tempo               | `FF 51` | buffered, is used in the next delta to ms calculation |
+| SMPTE offset        | `FF 54` | skip               |
 | Time signature      | `FF 58` | buffered, not used |
 | Key signature       | `FF 59` | buffered, not used |
-| Key signature       | `FF 7F` | not detected       |
+| Key signature       | `FF 7F` | skip               |
 | Note off            | `80`    | lambda called      |
 | Note on             | `90`    | lambda called      |
 | Polyphonic pressure | `F0 A0` | skip               |

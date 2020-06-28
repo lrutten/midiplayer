@@ -201,6 +201,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                               // read only if present
                               seqnr = read_2b_integer(fp);
                            }
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x01:
                            // text
@@ -210,6 +211,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                            }
                            text[melen] = '\0';
                            if (debug) printf("text %s\r\n", text);
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x02:
                            // copyright notice
@@ -217,6 +219,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                            {
                               read_char(fp);
                            }
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x03:
                            // track name
@@ -226,6 +229,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                            }
                            track_name[melen] = '\0';
                            if (debug) printf("track name %s\r\n", track_name);
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x04:
                            // instrument name
@@ -233,6 +237,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                            {
                               read_char(fp);
                            }
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x05:
                            // lyric text
@@ -240,20 +245,49 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                            {
                               read_char(fp);
                            }
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x06:
                            // marker text
+                           for (unsigned int i = 0; i<melen; i++)
+                           {
+                              read_char(fp);
+                           }
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x07:
                            // cue point
+                           for (unsigned int i = 0; i<melen; i++)
+                           {
+                              read_char(fp);
+                           }
+                           notefu(delta, type, 0, 0);
+                           break;
+                        case 0x08:
+                           // Program name
+                           for (unsigned int i = 0; i<melen; i++)
+                           {
+                              read_char(fp);
+                           }
+                           notefu(delta, type, 0, 0);
+                           break;
+                        case 0x09:
+                           // Device name
+                           for (unsigned int i = 0; i<melen; i++)
+                           {
+                              read_char(fp);
+                           }
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x20:
                            // midi channel prefix assignment
                            read_char(fp);
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x21:
                            // midi port
                            read_char(fp);
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x2f:
                            // track end
@@ -263,9 +297,15 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                            // tempo
                            tempo = read_3b_integer(fp);
                            if (debug) printf("tempo %lu\r\n", tempo);
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x54:
-                           // SMPTE offset
+                           // SMPTE offset, fixed size = 5 bytes
+                           for (unsigned int i = 0; i<melen; i++)
+                           {
+                              read_char(fp);
+                           }
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x58:
                            // time signature
@@ -277,13 +317,21 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                            if (debug) printf("time signature %d %d %d %d\r\n",
                               tsig_num, tsig_den, mtro_tic, not_32nd);
 
-                           //reading = false;
+                           notefu(delta, type, 0, 0);
                            break;
                         case 0x59:
                            // key signature
                            sf = read_char(fp);
                            mi = read_char(fp);
                            break;
+                           notefu(delta, type, 0, 0);
+                        case 0x7f:
+                           // Sequencer specific event
+                           for (unsigned int i = 0; i<melen; i++)
+                           {
+                              read_char(fp);
+                           }
+                           notefu(delta, type, 0, 0);
                      }
                   }
                   else
@@ -303,6 +351,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                      // polyphonic pressure
                      read_char(fp);
                      read_char(fp);
+                     notefu(delta, type, 0, 0);
 
                      stabuf.clear_set(type);
                   }
@@ -323,6 +372,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                      // program change
                      unsigned char cha = read_char(fp);
                      if (debug) printf("program change %x\r\n", cha);
+                     notefu(delta, type, 0, 0);
 
                      stabuf.clear_set(type);
                   }
@@ -331,6 +381,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                   {
                      // channel pressure
                      read_char(fp);
+                     notefu(delta, type, 0, 0);
 
                      stabuf.clear_set(type);
                   }
@@ -340,6 +391,39 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                      // pitch bend
                      read_char(fp);
                      read_char(fp);
+                     notefu(delta, type, 0, 0);
+
+                     stabuf.clear_set(type);
+                  }
+                  else
+                  if ((type & 0xf0) == 0xf0)
+                  {
+                     // single SysEx
+                     unsigned int  melen;
+                     melen = read_var_len_val(fp);
+                     if (debug) printf("melen %d\r\n", melen);
+                     for (unsigned int i = 0; i<melen; i++)
+                     {
+                        read_char(fp);
+                     }
+
+                     notefu(delta, type, 0, 0);
+
+                     stabuf.clear_set(type);
+                  }
+                  else
+                  if ((type & 0xf0) == 0xf7)
+                  {
+                     // escaped single SysEx
+                     unsigned int  melen;
+                     melen = read_var_len_val(fp);
+                     if (debug) printf("melen %d\r\n", melen);
+                     for (unsigned int i = 0; i<melen; i++)
+                     {
+                        read_char(fp);
+                     }
+
+                     notefu(delta, type, 0, 0);
 
                      stabuf.clear_set(type);
                   }
@@ -378,13 +462,15 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
          }
          else
          {
+            // less than 4 bytes in file
             if (debug) printf("wrong track in first 4 bytes\r\n");
+            return 1;
          }
       }
       else
       {
          printf("wrong header\n");
-         return 0;
+         return 1;
       }
    }   
    fclose(fp);

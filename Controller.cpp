@@ -205,9 +205,13 @@ void Controller::play()
          rtos::ThisThread::sleep_for(delta_ms); // time in ms
       }
 
-      midiout.putc(type);
-      midiout.putc(note);
-      midiout.putc(velo);
+      // Send only Note off, Note on and Controller
+      if (type == 0x80 || type == 0x90 || type == 0xb0)
+      {
+         midiout.putc(type);
+         midiout.putc(note);
+         midiout.putc(velo);
+      }
    });
 
    // stop the timer
