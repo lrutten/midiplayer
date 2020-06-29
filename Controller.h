@@ -69,6 +69,8 @@ public:
    void play();
    void displayList();
    void setRotaryButton(RotaryButton *bu);
+   void allsoundoff();
+   void allnotesoff();
 
 private:
    SDBlockDevice  *bd;

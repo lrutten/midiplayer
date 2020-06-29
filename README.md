@@ -54,16 +54,18 @@ event is handled by the parser.
 | Key signature       | `FF 7F` | skip               |
 | Note off            | `80`    | lambda called      |
 | Note on             | `90`    | lambda called      |
-| Polyphonic pressure | `F0 A0` | skip               |
-| Controller          | `F0 B0` | lambda called      |
-| Program change      | `F0 C0` | skip               |
-| Channel pressure    | `F0 D0` | skip               |
-| Pitch bend          | `F0 E0` | skip               |
-| Sys Ex event        | `F0 LL` | not detected       |
+| Polyphonic pressure | `A0`    | skip               |
+| Controller          | `B0`    | lambda called      |
+| Program change      | `C0`    | skip               |
+| Channel pressure    | `D0`    | skip               |
+| Pitch bend          | `E0`    | skip               |
+| single SysEx        | `F0`    | skip               |
 | Escape sequence     | `F3`    | not detected       |
-| Escape sequence     | `F7`    | not detected       |
+| Escaped single SysEx| `F7`    | skip               |
 
 The *Running status* mechanism is handled correctly.
+
+On parsing error a *All Sound Off* and *All Notes Off* message is sent.
 
 ## Hardware
 

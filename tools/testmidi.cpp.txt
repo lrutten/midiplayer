@@ -18,8 +18,10 @@ public:
 
    void play(const char *fln)
    {
-      int notectr = 0;   
-      mf->parse(fln, [this, &notectr](unsigned int delta, unsigned char type, unsigned char note, unsigned char velo)
+      unsigned int time = 0;
+      int notectr = 0;
+      ParserResult r = 
+      mf->parse(fln, [this, &notectr, &time](unsigned int delta, unsigned char type, unsigned char note, unsigned char velo)
       {
          printf("---> note ooo %ld, %x, %d, %d\r\n", delta, type, note, velo);
          notectr++;
@@ -29,8 +31,18 @@ public:
          if (delta_ms > 0)
          {
             //rtos::ThisThread::sleep_for(delta_ms); // time in ms
+            time += delta_ms;
          }
       });
+      if (r == parser_ok)
+      {
+         printf("parser ok\r\n");
+      }
+      else
+      {
+         printf("parser error\r\n");
+      }
+      printf("total time %d \r\n", time);
    }
 
 private:

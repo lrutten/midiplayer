@@ -69,11 +69,21 @@ private:
    unsigned int  size;
 };
 
+enum ParserResult
+{
+   parser_ok,
+   parser_headererror,
+   parser_shorterror,
+   parser_trackerror,
+   parser_subtypeerror,
+   parser_openerror
+};
+
 class MidiFile
 {
 public:
    MidiFile();
-   int parse(const char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu);
+   ParserResult parse(const char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu);
    unsigned int delta_to_ms(unsigned int dlt);
 
 private:

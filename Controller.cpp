@@ -143,6 +143,10 @@ void Controller::setRotaryButton(RotaryButton *bu)
 void Controller::start()
 {
    blog("Controller::start()\r\n");
+
+   allsoundoff();
+   allnotesoff();
+
    Actor::start();
 }
 
@@ -184,6 +188,20 @@ void Controller::displayList()
    //printf("%s\r\n", dirlist.getCurrFull());
 }
 
+void Controller::allsoundoff()
+{
+   midiout.putc(0xb0);
+   midiout.putc(120);
+   midiout.putc(0);
+}
+
+void Controller::allnotesoff()
+{
+   midiout.putc(0xb0);
+   midiout.putc(123);
+   midiout.putc(0);
+}
+
 void Controller::play()
 {
    printf("play\r\n");
@@ -193,6 +211,7 @@ void Controller::play()
    // start the timer
    t.start();
    const char *fln =  dirlist.getCurrFull();
+   ParserResult r =
    mf.parse(fln, [this, &notectr](unsigned int delta, unsigned char type, unsigned char note, unsigned char velo)
    {
       //printf("note ooo %ld, %x, %d\r\n", delta, type, note);
@@ -214,6 +233,12 @@ void Controller::play()
       }
    });
 
+   if (r != parser_ok)
+   {
+      // go silent now
+      allsoundoff();
+      allnotesoff();
+   }
    // stop the timer
    t.stop();
 

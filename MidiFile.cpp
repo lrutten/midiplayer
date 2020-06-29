@@ -125,7 +125,7 @@ unsigned int MidiFile::delta_to_ms(unsigned int dlt)
    return (unsigned int)(((double) dlt) * tick_ms);
 }
 
-int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu)
+ParserResult MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned char, unsigned char, unsigned char)> notefu)
 {
    if (debug) printf("start midireader\r\n");
 
@@ -133,6 +133,7 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
    if (fp == NULL)
    {
       if (debug) printf("error at fopen\r\n");
+      return parser_openerror;
    }
 
    if (debug) printf("fopen ok\r\n");
@@ -297,6 +298,10 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                            // tempo
                            tempo = read_3b_integer(fp);
                            if (debug) printf("tempo %lu\r\n", tempo);
+                           
+                           // calculate the bpm only for test
+                           //if (debug) printf("   bpm %3.1lf\r\n", 1.0/tempo*1000000.0*60.0);
+
                            notefu(delta, type, 0, 0);
                            break;
                         case 0x54:
@@ -332,6 +337,11 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                               read_char(fp);
                            }
                            notefu(delta, type, 0, 0);
+                           break;
+                        default:
+                           // wrong subtype
+                           fclose(fp);
+                           return parser_subtypeerror;
                      }
                   }
                   else
@@ -457,22 +467,34 @@ int MidiFile::parse(const char *fn, std::function<void(unsigned int, unsigned ch
                         type = stabuf.get_type();
                      }
                   }
-               }
+               } // while
+               
+               fclose(fp);
+               return parser_ok;
+            }
+            else
+            {
+               return parser_trackerror;
             }
          }
          else
          {
             // less than 4 bytes in file
             if (debug) printf("wrong track in first 4 bytes\r\n");
-            return 1;
+            return parser_shorterror;
          }
       }
       else
       {
-         printf("wrong header\n");
-         return 1;
+         if (debug) printf("wrong header\n");
+         return parser_headererror;
       }
-   }   
-   fclose(fp);
-   return 0;
+   }
+   else
+   {
+      // file too short, less than 4 bytes 
+      if (debug) printf("file too short\n");
+      fclose(fp);
+      return parser_shorterror;
+   }
 }
